@@ -22,15 +22,28 @@ ledPin = 27
 buttonPin = 22
 flashLedPin = 10
 
-global arduino
+
 
 while True:
+    global arduino
     try:
-        arduino = serial.Serial("COM7", 9600)
+        arduino = serial.Serial("COM4", 9600, write_timeout=0.0001)
         print('Порт: %s' % arduino.name)
         break
     except serial.SerialException:
         print("порт %s ошибка !!!")
+
+
+def write(data):
+    try:
+        if arduino.isOpen():
+            arduino.write(data)
+    except serial.SerialTimeoutException:
+        arduino.flushOutput()
+        arduino.close()
+        arduino.open()
+        print("Time out exception !!!")
+
 
 
 # Define some helper functions:
@@ -40,28 +53,32 @@ def press_callback(obj):
     print("Button pressed,", obj.text)
     if obj.text == 'BEEP!':
         # turn on the beeper:
-        arduino.write('b@1')
+        write(b'b@1')
+
         # schedule it to turn off:
         Clock.schedule_once(buzzer_off, .1)
     if obj.text == 'LED':
         if obj.state == "down":
             print("button on")
-            arduino.write('l@1')
+            write(b'l@1')
         else:
             print("button off")
-            arduino.write('l@0')
+            write(b'l@0')
 
 
 def buzzer_off(dt):
-    arduino.write('b@0')
+    if arduino.isOpen():
+        arduino.reset_output_buffer()
+        write(b'b@0')
+
 
 
 # Toggle the flashing LED according to the speed global
 # This will need better implementation
 def flash(dt):
     global speed
-    arduino.write('l@%d' % speed)
-    Clock.schedule_once(flash, 1.0 / speed)
+    write(b'c@%d' % speed)
+    Clock.schedule_once(flash, 0.2)
 
 
 # This is called when the slider is updated:
@@ -74,10 +91,12 @@ def update_speed(obj, value):
 # Modify the Button Class to update according to GPIO input:
 class InputButton(Button):
     def update(self, dt):
-        if arduino.read() == '1':
-            self.state = 'normal'
-        else:
-            self.state = 'down'
+        if arduino.isOpen():
+            if arduino.read() == b'1':
+                self.state = 'normal'
+            else:
+                self.state = 'down'
+
 
 
 class MyApp(App):
@@ -103,7 +122,7 @@ class MyApp(App):
         beepButton.bind(on_press=press_callback)
         wimg = Image(source='logo.png')
         speedSlider = Slider(orientation='vertical', min=1, max=30, value=speed)
-        speedSlider.bind(on_touch_down=update_speed, on_touch_move=update_speed)
+        speedSlider.bind(on_touch_move=update_speed)
 
         # Add the UI elements to the layout:
         layout.add_widget(wimg)
@@ -113,7 +132,7 @@ class MyApp(App):
         layout.add_widget(speedSlider)
 
         # Start flashing the LED
-        Clock.schedule_once(flash, 1.0 / speed)
+        Clock.schedule_once(flash, 0.2)
 
         return layout
 
