@@ -2,6 +2,8 @@ from kivy.app import App
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.slider import Slider
 from kivy.graphics import Color, Rectangle
+from kivy.uix.button import Button
+from kivy.core.window import Window
 
 
 import serial
@@ -53,10 +55,13 @@ def write(data):
         print("Time out exception !!!")
 
 
+
+
+
 class MyApp(App):
     def build(self):
 
-        layout = GridLayout(cols=3, spacing=30, padding=30, row_default_height=150)
+        layout = GridLayout(cols=4, spacing=30, padding=30, row_default_height=150)
 
         with layout.canvas.before:
             Color(.2, .2, .2, 1)
@@ -65,14 +70,19 @@ class MyApp(App):
         rSlider = Slider(orientation='vertical', min=0, max=255, value=r)
         gSlider = Slider(orientation='vertical', min=0, max=255, value=g)
         bSlider = Slider(orientation='vertical', min=0, max=255, value=b)
+        btn = Button(text="Exit")
+        btn.bind(on_press=self.exitApp)
         rSlider.bind(on_touch_move=update_r)
         gSlider.bind(on_touch_move=update_g)
         bSlider.bind(on_touch_move=update_b)
         layout.add_widget(rSlider)
         layout.add_widget(gSlider)
         layout.add_widget(bSlider)
+        layout.add_widget(btn)
         return layout
 
+    def exitApp(self, value):
+       self.stop()
 
 if __name__ == '__main__':
     MyApp().run()
