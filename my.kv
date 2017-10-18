@@ -1,0 +1,75 @@
+
+<MyBoxLayout>:
+    orientation: 'vertical'
+    Label:
+        id: label1
+        font_size: '50sp'
+        text: "%03d" % app.count
+
+    Label:
+        id: label1
+        font_size: '50sp'
+        text: "%03d" % app.val
+
+    Button:
+        text: "Push Me !!!"
+        size_hint: (.5, .5)
+        font_size: '25sp'
+        on_press:
+            app.count += 1
+    Slider:
+        orientation: 'horizontal'
+        min: 0
+        max: 127
+        on_value:
+            root.get_value(self.value, 1)
+            app.val = self.value
+
+    Slider:
+        orientation: 'horizontal'
+        min: 0
+        max: 127
+        on_value:
+            root.get_value(self.value, 2)
+            app.val = self.value
+
+    PageLayout:
+        BoxLayout:
+            Button:
+                text: "Btn 1"
+                size_hint_x: None
+                width: 50
+
+            Button:
+                text: "Btn 2"
+                size_hint_x: None
+                width: 50
+            Button:
+                text: "Btn 3"
+                size_hint_x: None
+                width: 50
+
+            Button:
+                text: "Btn 4"
+                size_hint_x: None
+                width: 50
+        BoxLayout:
+            Button:
+                text: "Btn 5"
+                size_hint_x: None
+                width: 50
+
+            Button:
+                text: "Btn 6"
+                size_hint_x: None
+                width: 50
+                top: 100
+            Button:
+                text: "Btn 7"
+                size_hint_x: None
+                width: 50
+
+            Button:
+                text: "Btn 8"
+                size_hint_x: None
+                width: 50
